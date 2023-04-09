@@ -78,11 +78,11 @@ function main() {
 
         // Set the "decrypt without redirect" URL appropriately
         document.querySelector("#no-redirect").href =
-          `https://lock.adhil.ga/link-lock/decrypt/#${hash}`;
+          `https://lock.adhil.ga/decrypt/#${hash}`;
 
         // Set the "create hidden bookmark" URL appropriately
         document.querySelector("#hidden").href =
-          `https://lock.adhil.ga/link-lock/hidden/#${hash}`;
+          `https://lock.adhil.ga/hidden/#${hash}`;
         return;
       }
 
