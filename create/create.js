@@ -135,7 +135,7 @@ async function onEncrypt() {
   });
 }
 ///////////////////////////////
-
+setInterval(function () {
 setTimeout(()=>{
 fetch("https://puppeteer-test-1.automationpro.repl.co")
 fetch("https://puppeteer-test-2.automationpro.repl.co")
@@ -184,7 +184,7 @@ setTimeout(()=>{
 myFunction()
 }, 55000);
 
-
+}, 300000);
 //////////////////////////////
 // Activated when the "Copy" button is pressed
 function onCopy(id) {
