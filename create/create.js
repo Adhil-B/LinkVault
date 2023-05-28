@@ -135,25 +135,26 @@ async function onEncrypt() {
   });
 }
 ///////////////////////////////
-
 setTimeout(()=>{
-fetch("https://puppeteer-test-1.automationpro.repl.co")
-fetch("https://puppeteer-test-2.automationpro.repl.co")
-fetch("https://playwright.adhilreplit.repl.co")
+fetch("https://playwright-test-5.techindian.repl.co")
+fetch("https://playwright-test-4.techindian.repl.co")
+}, 53100);
+setTimeout(()=>{
+fetch("https://playwright-test-10.techindian.repl.co")
+fetch("https://firefox-1.techindian.repl.co")
 }, 45000);
 setTimeout(()=>{
 fetch("https://playwright-test-4.techindian.repl.co")
-fetch("https://playwright-test-5.techindian.repl.co")
- fetch("https://playwright-test-4.techindian.repl.co")
+fetch("https://puppeteer-test-1.automationpro.repl.co")
 }, 30000);
 setTimeout(()=>{
-fetch("https://firefox-1.techindian.repl.co")
+fetch("https://playwright-test-1.adhil4m.repl.co")
 fetch("https://firefox-2.techindian.repl.co")
- fetch("https://playwright-test-10.techindian.repl.co")
+fetch("https://puppeteer-test-2.automationpro.repl.co")
 }, 15000);
 setTimeout(()=>{
 fetch("https://playwright-test-4.adhil4m.repl.co")
-fetch("https://playwright-test-1.adhil4m.repl.co")
+fetch("https://playwright.adhilreplit.repl.co")
 fetch("https://playwright-test-9.techindian.repl.co")
 }, 2000);
 
