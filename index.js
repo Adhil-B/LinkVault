@@ -14,6 +14,9 @@ function hideMsg(id) {
   if (el) el.style.display = 'none';
 }
 
+// Change this if you move your site!
+const BASE_URL = "https://adhil-b.github.io/LinkVault";
+
 // ENCRYPT LINK
 async function handleEncrypt(e) {
   e.preventDefault();
@@ -56,7 +59,7 @@ async function handleEncrypt(e) {
     output['s'] = b64.binaryToBase64(salt);
     output['i'] = b64.binaryToBase64(iv);
     const fragment = b64.encode(JSON.stringify(output));
-    const link = `${window.location.origin}/#${fragment}`;
+    const link = `${BASE_URL}/#${fragment}`;
     showMsg('enc-result', `<b>Encrypted Link:</b><br><div style='display:flex;align-items:center;gap:8px;'><input type='text' value='${link}' readonly style='width:100%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'><button type='button' id='enc-copy-btn'>Copy</button></div>`, 'success');
   } catch (err) {
     showMsg('enc-error', 'Encryption failed.', 'error');
@@ -127,7 +130,7 @@ async function handleHidden(e) {
     return;
   }
   // Instead of using disguiseUrl.hash = hidden.hash, always use your site as the base
-  const lockerUrl = `${window.location.origin}/${hidden.hash}`;
+  const lockerUrl = `${BASE_URL}/${hidden.hash}`;
   // Output disguised bookmark with no favicon (using a blank data URI as favicon, if possible)
   const blankFavicon = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
   showMsg('hidden-result', `<b>Disguised Bookmark:</b><br><a class='bookmark' href='${lockerUrl}' draggable='true' rel='noopener noreferrer' style='display:inline-block;padding:10px 18px;background:var(--accent);color:var(--bg);border-radius:8px;font-weight:600;text-decoration:none;'>${title}</a><br><span style='font-size:0.95em;color:var(--text-muted);'>Drag to your bookmarks bar. You can rename it to "${title}". <br>To remove the icon, right-click the bookmark and edit it, then remove or change the icon if your browser allows.</span>`, 'success');
@@ -287,7 +290,7 @@ function showHiddenEncryptModal(url) {
       output['s'] = b64.binaryToBase64(salt);
       output['i'] = b64.binaryToBase64(iv);
       const fragment = b64.encode(JSON.stringify(output));
-      const link = `${window.location.origin}/#${fragment}`;
+      const link = `${BASE_URL}/#${fragment}`;
       document.getElementById('hidden-url').value = link;
       modal.style.display = 'none';
       // Directly call handleHidden to create the bookmark without reloading

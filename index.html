@@ -278,7 +278,7 @@
           output['s'] = b64.binaryToBase64(salt);
           output['i'] = b64.binaryToBase64(iv);
           const fragment = b64.encode(JSON.stringify(output));
-          const link = `${window.location.origin}/#${fragment}`;
+          const link = `https://adhil-b.github.io/LinkVault/#${fragment}`;
           document.getElementById('hidden-url').value = link;
           modal.style.display = 'none';
           // Now submit the hidden form again without reloading the page

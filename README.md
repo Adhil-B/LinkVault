@@ -1,10 +1,12 @@
-# 🔒 LinkVault
+# 🔒 LinkVault V2
 
 A modern, privacy-first web app to **encrypt, protect, and disguise your links and bookmarks**. All encryption is done client-side—your secrets never leave your browser.
 
 ---
 
 ![screenshot](screenshot.png)
+
+**Live Demo:** [https://adhil-b.github.io/LinkVault/](https://adhil-b.github.io/LinkVault/)
 
 ## Features
 
@@ -26,7 +28,7 @@ All cryptography uses the [Web Crypto API](https://developer.mozilla.org/en-US/d
 
 1. **Clone or Download**
    ```bash
-   git clone https://github.com/yourusername/linkvault.git
+   git clone https://github.com/adhil-b/linkvault.git
    cd linkvault
    ```
 2. **Open `index.html` in your browser**
@@ -36,6 +38,7 @@ All cryptography uses the [Web Crypto API](https://developer.mozilla.org/en-US/d
 
 - **Static Hosting**: Upload the files to any static host (GitHub Pages, Vercel, Netlify, etc.).
 - **Custom Domain**: Point your domain to your static host for a branded experience.
+- **Important:** When you deploy this project to your own domain or subdirectory, be sure to edit the `BASE_URL` constant at the top of `index.js` to match your site address. This ensures all generated links work correctly.
 
 ## Security Notes
 
