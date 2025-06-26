@@ -1,0 +1,291 @@
+/*
+ * Modern Dark Theme for Locker
+ * Compact, card-based, modern UI
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:root {
+  --bg: #181a20;
+  --card-bg: #23262f;
+  --accent: #00c6ad;
+  --accent-hover: #00a896;
+  --text: #f4f4f4;
+  --text-muted: #b0b8c1;
+  --error: #ff4d4f;
+  --success: #00c896;
+  --border: #2c2f36;
+  --radius: 14px;
+  --shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 0 8px;
+}
+
+header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 32px 0 16px 0;
+  text-align: center;
+}
+
+.logo {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 24px auto 32px auto;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  gap: 0;
+}
+nav button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+  flex: 1 1 0;
+  min-width: 120px;
+  margin: 0 2px;
+}
+nav button.active, nav button:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.main-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px 24px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border: 1px solid var(--border);
+  width: 100%;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+
+/* Form layout improvements */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.labeled-input, .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 0;
+}
+@media (min-width: 480px) {
+  .labeled-input, .form-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+  .labeled-input label, .form-row label {
+    width: 140px;
+    min-width: 100px;
+    text-align: right;
+    margin-bottom: 0;
+    margin-right: 8px;
+  }
+  .labeled-input input, .form-row input,
+  .labeled-input textarea, .form-row textarea {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+label {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+input, textarea, select {
+  background: #23262f;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-bottom: 0;
+  outline: none;
+  transition: border 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  border: 1.5px solid var(--accent);
+}
+
+button, .button {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.18s;
+  margin-top: 4px;
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.10);
+}
+button:hover, .button:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
+}
+
+.alert, .error, .success {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.98rem;
+  margin-bottom: 8px;
+}
+.error {
+  background: rgba(255,77,79,0.12);
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+.success {
+  background: rgba(0,200,150,0.12);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+footer {
+  margin-top: auto;
+  padding: 24px 0 12px 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+@media (max-width: 800px) {
+  nav {
+    max-width: 100vw;
+    padding: 0 2vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-cards, header {
+    max-width: 100vw;
+    padding: 0 2vw;
+  }
+  .card {
+    padding: 16px 6px 14px 6px;
+  }
+}
+
+.bookmark {
+  padding: 11px 18px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 5px;
+  margin-right: 5px;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  font-size: 1rem;
+  max-width: 100%;
+  min-width: 80px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.10);
+}
+.bookmark:hover {
+  background: var(--accent-hover);
+  color: var(--bg);
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+}
+.bookmark[aria-disabled="true"] {
+  background: rgba(235, 235, 235, 0.12);
+  color: gray;
+}
+
+/* Output area improvements */
+.output input[type="text"], .output input[type="url"] {
+  background: #23262f;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-bottom: 0;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.output input[type="text"]:focus, .output input[type="url"]:focus {
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,198,173,0.10);
+}
+
+/* Section spacing improvements */
+form > *:not(:last-child) {
+  margin-bottom: 10px;
+} 

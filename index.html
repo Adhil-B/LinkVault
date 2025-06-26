@@ -1,56 +1,297 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-
+<html lang="en">
 <head>
-  <!-- Metadata -->
   <meta charset="utf-8" />
-  <meta name="description" content="Password protect links using AES in the browser." />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <script async src="https://arc.io/widget.min.js#87vWyH94"></script>
-
-  <!--link rel="shortcut icon" type="image/x-icon" href="favicon.ico"-->
-
-  <title>Locker</title>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" type="text/css" />
-
-  <!-- Scripts -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Locker – Modern Link Locker</title>
+  <link rel="stylesheet" href="modern.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <script type="text/javascript" src="b64.js"></script>
   <script type="text/javascript" src="api.js"></script>
-  <script type="text/javascript" src="index.js"> </script>
+  <script type="text/javascript" src="index.js"></script>
 </head>
-
-<body onload="main()">
-  <!-- Explanation for those who do not have JavaScript enabled -->
-  <noscript>
-  <div class="red-border">
-    <p>If you are seeing this, it means that you have JavaScript disabled. Please enable JavaScript to access the locked link.</p>
-
-    <p>This application is entirely programmed in JavaScript. This was done intentionally, so that all encryption and decryption happens client-side.</p>
-
-  </div>
-  </noscript>
-
-  <div class="form" style="display: none">
-    <p>Please enter the password to unlock the link.</p>
-    <p id="hint"></p>
-
+<body>
+  <header>
+    <div class="logo">🔒 Locker</div>
+    <nav>
+      <button class="active" data-tab="encrypt">Encrypt Link</button>
+      <button data-tab="decrypt">Decrypt Link</button>
+      <button data-tab="hidden">Hidden Bookmarks</button>
+      <!-- <button data-tab="bruteforce">Brute Force</button> -->
+    </nav>
+  </header>
+  <main class="main-cards">
+    <!-- Encrypt Link Card -->
+    <section class="card" id="tab-encrypt">
+      <h2>Encrypt Link</h2>
+      <form id="encrypt-form">
+        <label for="enc-url">Link to protect</label>
+        <input type="url" id="enc-url" placeholder="https://example.com" required />
+        <label for="enc-password">Password</label>
+        <input type="password" id="enc-password" required />
+        <label for="enc-confirm">Confirm Password</label>
+        <input type="password" id="enc-confirm" required />
+        <label for="enc-hint">Hint (optional)</label>
+        <input type="text" id="enc-hint" />
+        <button type="submit">Encrypt</button>
+        <div id="enc-result-row" style="display:none;align-items:center;gap:8px;margin-top:8px;">
+          <div style="flex:1;min-width:0;" id="enc-result"></div>
+          <button type="button" id="enc-copy-btn" style="display:none;">Copy</button>
+        </div>
+        <div id="enc-copy-msg" class="success" style="display:none;margin-top:4px;"></div>
+        <div id="enc-error" class="error" style="display:none;"></div>
+      </form>
+    </section>
+    <!-- Decrypt Link Card -->
+    <section class="card" id="tab-decrypt" style="display:none;">
+      <h2>Decrypt Link</h2>
+      <form id="decrypt-form">
+        <label for="dec-url">Encrypted Link</label>
+        <input type="url" id="dec-url" placeholder="https://...#..." required />
+        <label for="dec-password">Password</label>
+        <input type="password" id="dec-password" required />
+        <button type="submit">Decrypt</button>
+        <div id="dec-result" class="success" style="display:none;"></div>
+        <div id="dec-error" class="error" style="display:none;"></div>
+      </form>
+    </section>
+    <!-- Hidden Bookmarks Card -->
+    <section class="card" id="tab-hidden" style="display:none;">
+      <h2>Hidden Bookmarks</h2>
+      <form id="hidden-form">
+        <label for="hidden-url">Hidden (encrypted) URL</label>
+        <input type="url" id="hidden-url" placeholder="https://...#..." required />
+        <label for="hidden-title">Disguised Bookmark Name</label>
+        <input type="text" id="hidden-title" placeholder="e.g. Gmail" required />
+        <label for="hidden-disguise">Bookmark Disguise URL</label>
+        <input type="url" id="hidden-disguise" placeholder="https://gmail.com" required />
+        <button type="submit">Create Disguised Bookmark</button>
+        <button type="button" id="hidden-random">Use Random Disguise</button>
+        <div id="hidden-result" class="success" style="display:none;"></div>
+        <div id="hidden-error" class="error" style="display:none;"></div>
+      </form>
+    </section>
+    <!-- Brute Force Card -->
+    <!--
+    <section class="card" id="tab-bruteforce" style="display:none;">
+      <h2>Brute Force</h2>
+      <form id="brute-form">
+        <label for="brute-url">Encrypted Link</label>
+        <input type="url" id="brute-url" placeholder="https://...#..." required />
+        <label for="brute-charset">Charset</label>
+        <input type="text" id="brute-charset" value="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" required />
+        <button type="submit">Start Brute Force</button>
+        <div id="brute-result" class="success" style="display:none;"></div>
+        <div id="brute-error" class="error" style="display:none;"></div>
+      </form>
+    </section>
+    -->
+  </main>
+  <footer>
     <hr />
-
-    <label for="password">password</label>
-    <input type="password" id="password" autofocus />
-    <button id="unlockbutton">Unlock link</button>
+  </footer>
+  <div id="decrypt-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(24,26,32,0.96);z-index:1000;align-items:center;justify-content:center;">
+    <form id="modal-decrypt-form" style="background:var(--card-bg);padding:32px 24px 24px 24px;border-radius:var(--radius);box-shadow:var(--shadow);max-width:340px;width:90vw;display:flex;flex-direction:column;gap:18px;align-items:stretch;">
+      <h2 style="color:var(--accent);margin:0 0 8px 0;font-size:1.2rem;text-align:center;">Unlock Link</h2>
+      <div id="modal-hint" style="color:var(--text-muted);font-size:1rem;text-align:center;"></div>
+      <input type="password" id="modal-password" placeholder="Enter password" style="font-size:1.1rem;" autofocus required />
+      <button type="submit">Unlock</button>
+      <div id="modal-error" class="error" style="display:none;"></div>
+    </form>
   </div>
-
-  <!-- Display errors in a big red box -->
-  <div class="error red-border" style="display: none">
-    <p id="errortext">Error</p>
-    <button onclick="main()">Try again</button>
-
-    
-
+  <!-- Hidden Bookmark Encrypt Modal -->
+  <div id="hidden-encrypt-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(24,26,32,0.96);z-index:1001;align-items:center;justify-content:center;">
+    <form id="hidden-encrypt-form" style="background:var(--card-bg);padding:32px 24px 24px 24px;border-radius:var(--radius);box-shadow:var(--shadow);max-width:340px;width:90vw;display:flex;flex-direction:column;gap:18px;align-items:stretch;">
+      <h2 style="color:var(--accent);margin:0 0 8px 0;font-size:1.2rem;text-align:center;">Encrypt Link for Hidden Bookmark</h2>
+      <div style="color:var(--text-muted);font-size:1rem;text-align:center;">The link you entered is not encrypted. Please create a password to protect it.</div>
+      <input type="password" id="hidden-modal-password" placeholder="Password" style="font-size:1.1rem;" required />
+      <input type="password" id="hidden-modal-confirm" placeholder="Confirm Password" style="font-size:1.1rem;" required />
+      <input type="text" id="hidden-modal-hint" placeholder="Hint (optional)" style="font-size:1.1rem;" />
+      <button type="submit">Encrypt & Use</button>
+      <div id="hidden-modal-error" class="error" style="display:none;"></div>
+    </form>
   </div>
+  <script>
+    // Tab switching logic
+    function switchTab(tab) {
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.querySelector('nav button[data-tab="' + tab + '"]').classList.add('active');
+      document.querySelectorAll('.main-cards > section').forEach(sec => {
+        sec.style.display = sec.id === 'tab-' + tab ? '' : 'none';
+      });
+    }
+    document.querySelectorAll('nav button').forEach(btn => {
+      btn.onclick = () => {
+        switchTab(btn.getAttribute('data-tab'));
+      };
+    });
+    // Modal unlock logic
+    async function showUnlockModal(hash) {
+      const modal = document.getElementById('decrypt-modal');
+      const form = document.getElementById('modal-decrypt-form');
+      const passwordInput = document.getElementById('modal-password');
+      const errorDiv = document.getElementById('modal-error');
+      const hintDiv = document.getElementById('modal-hint');
+      errorDiv.style.display = 'none';
+      passwordInput.value = '';
+      let params;
+      try {
+        params = JSON.parse(b64.decode(hash));
+      } catch {
+        errorDiv.innerText = 'Corrupted or invalid link.';
+        errorDiv.style.display = '';
+        modal.style.display = 'flex';
+        return;
+      }
+      if ('h' in params) {
+        hintDiv.innerText = 'Hint: ' + params['h'];
+      } else {
+        hintDiv.innerText = '';
+      }
+      modal.style.display = 'flex';
+      passwordInput.focus();
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        errorDiv.style.display = 'none';
+        const password = passwordInput.value;
+        const api = apiVersions[params['v']];
+        const encrypted = b64.base64ToBinary(params['e']);
+        const salt = 's' in params ? b64.base64ToBinary(params['s']) : null;
+        const iv = 'i' in params ? b64.base64ToBinary(params['i']) : null;
+        try {
+          const url = await api.decrypt(encrypted, password, salt, iv);
+          // Validate URL
+          let urlObj = new URL(url);
+          if (!(urlObj.protocol === 'http:' || urlObj.protocol === 'https:' || urlObj.protocol === 'magnet:')) {
+            errorDiv.innerText = `The link uses a non-hypertext protocol: ${urlObj.protocol}`;
+            errorDiv.style.display = '';
+            return;
+          }
+          window.location.href = url;
+        } catch {
+          errorDiv.innerText = 'Incorrect password.';
+          errorDiv.style.display = '';
+        }
+      };
+    }
+    // On page load, if hash is present, show modal
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.location.hash && window.location.hash.length > 1) {
+        const hash = window.location.hash.slice(1);
+        showUnlockModal(hash);
+      }
+    });
+    // Update copy logic to work with new row
+    function setupEncryptCopy() {
+      const copyBtn = document.getElementById('enc-copy-btn');
+      const copyMsg = document.getElementById('enc-copy-msg');
+      const encResult = document.getElementById('enc-result');
+      const encResultRow = document.getElementById('enc-result-row');
+      if (!copyBtn || !copyMsg || !encResult || !encResultRow) return;
+      copyBtn.onclick = async () => {
+        // Find the input inside encResult
+        const input = encResult.querySelector('input[type="text"]');
+        if (input) {
+          input.select();
+          try {
+            await navigator.clipboard.writeText(input.value);
+            copyMsg.innerText = 'Copied!';
+            copyMsg.style.display = '';
+            setTimeout(() => { copyMsg.style.display = 'none'; }, 1800);
+          } catch {
+            copyMsg.innerText = 'Copy failed.';
+            copyMsg.style.display = '';
+          }
+        }
+      };
+    }
+    // Patch showMsg to show/hide copy button and row for enc-result
+    const origShowMsg = window.showMsg;
+    window.showMsg = function(id, msg, type = 'success') {
+      origShowMsg(id, msg, type);
+      if (id === 'enc-result') {
+        const copyBtn = document.getElementById('enc-copy-btn');
+        const copyMsg = document.getElementById('enc-copy-msg');
+        const encResultRow = document.getElementById('enc-result-row');
+        if (encResultRow) encResultRow.style.display = msg ? 'flex' : 'none';
+        if (copyBtn) copyBtn.style.display = msg ? '' : 'none';
+        if (copyMsg) copyMsg.style.display = 'none';
+      }
+    };
+    window.addEventListener('DOMContentLoaded', setupEncryptCopy);
+    // Hidden Bookmark: Intercept form submit if URL is not encrypted
+    const hiddenForm = document.getElementById('hidden-form');
+    if (hiddenForm) {
+      hiddenForm.onsubmit = async function(e) {
+        const hiddenUrlInput = document.getElementById('hidden-url');
+        let url = hiddenUrlInput.value.trim();
+        let isEncrypted = false;
+        try {
+          let u = new URL(url);
+          let hash = u.hash.slice(1);
+          JSON.parse(b64.decode(hash));
+          isEncrypted = true;
+        } catch { isEncrypted = false; }
+        if (!isEncrypted) {
+          e.preventDefault();
+          showHiddenEncryptModal(url);
+          return false;
+        }
+      };
+    }
+    // Show modal to encrypt link for hidden bookmark
+    function showHiddenEncryptModal(url) {
+      const modal = document.getElementById('hidden-encrypt-modal');
+      const form = document.getElementById('hidden-encrypt-form');
+      const pass = document.getElementById('hidden-modal-password');
+      const conf = document.getElementById('hidden-modal-confirm');
+      const hint = document.getElementById('hidden-modal-hint');
+      const errorDiv = document.getElementById('hidden-modal-error');
+      errorDiv.style.display = 'none';
+      pass.value = '';
+      conf.value = '';
+      hint.value = '';
+      modal.style.display = 'flex';
+      pass.focus();
+      form.onsubmit = async function(ev) {
+        ev.preventDefault();
+        errorDiv.style.display = 'none';
+        if (pass.value !== conf.value) {
+          errorDiv.innerText = 'Passwords do not match.';
+          errorDiv.style.display = '';
+          return;
+        }
+        if (!pass.value) {
+          errorDiv.innerText = 'Password required.';
+          errorDiv.style.display = '';
+          return;
+        }
+        try {
+          const api = apiVersions[LATEST_API_VERSION];
+          const salt = await api.randomSalt();
+          const iv = await api.randomIv();
+          const encrypted = await api.encrypt(url, pass.value, salt, iv);
+          const output = {
+            v: LATEST_API_VERSION,
+            e: b64.binaryToBase64(new Uint8Array(encrypted))
+          };
+          if (hint.value) output['h'] = hint.value;
+          output['s'] = b64.binaryToBase64(salt);
+          output['i'] = b64.binaryToBase64(iv);
+          const fragment = b64.encode(JSON.stringify(output));
+          const link = `${window.location.origin}/#${fragment}`;
+          document.getElementById('hidden-url').value = link;
+          modal.style.display = 'none';
+          // Now submit the hidden form again without reloading the page
+          setTimeout(() => {
+            hiddenForm.dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
+          }, 0);
+        } catch {
+          errorDiv.innerText = 'Encryption failed.';
+          errorDiv.style.display = '';
+        }
+      };
+    }
+  </script>
 </body>
-
 </html>

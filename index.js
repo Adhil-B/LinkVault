@@ -1,118 +1,300 @@
-function error(text) {
-  document.querySelector(".form").style.display = "none";
-  document.querySelector(".error").style.display = "inherit";
-  document.querySelector("#errortext").innerText = `Error: ${text}`;
+// Modern Locker Homepage JS
+// Handles all main features: Encrypt, Decrypt, Hidden Bookmarks, Brute Force
+
+// Helper: Show message
+function showMsg(id, msg, type = 'success') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = type;
+  el.innerHTML = msg;
+  el.style.display = '';
+}
+function hideMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
 }
 
-// Run when the <body> loads
-function main() {
-  if (window.location.hash) {
-    document.querySelector(".form").style.display = "inherit";
-    document.querySelector("#password").value = "";
-    document.querySelector("#password").focus();
-    document.querySelector(".error").style.display = "none";
-    document.querySelector("#errortext").innerText = "";
-
-    // Fail if the b64 library or API was not loaded
-    if (!("b64" in window)) {
-      error("Base64 library not loaded.");
-      return;
-    }
-    if (!("apiVersions" in window)) {
-      error("API library not loaded.");
-      return;
-    }
-
-    // Try to get page data from the URL if possible
-    const hash = window.location.hash.slice(1);
-    let params;
-    try {
-      params = JSON.parse(b64.decode(hash));
-    } catch {
-      error("The link appears corrupted.");
-      return;
-    }
-
-    // Check that all required parameters encoded in the URL are present
-    if (!("v" in params && "e" in params)) {
-      error("The link appears corrupted. The encoded URL is missing necessary parameters.");
-      return;
-    }
-
-    // Check that the version in the parameters is valid
-    if (!(params["v"] in apiVersions)) {
-      error("Unsupported API version. The link may be corrupted.");
-      return;
-    }
-
-    const api = apiVersions[params["v"]];
-
-    // Get values for decryption
-    const encrypted = b64.base64ToBinary(params["e"]);
-    const salt = "s" in params ? b64.base64ToBinary(params["s"]) : null;
-    const iv = "i" in params ? b64.base64ToBinary(params["i"]) : null;
-
-    let hint, password;
-    if ("h" in params) {
-      hint = params["h"];
-      document.querySelector("#hint").innerText = "Hint: " + hint;
-    }
-
-    const unlockButton = document.querySelector("#unlockbutton");
-    const passwordPrompt = document.querySelector("#password");
-    passwordPrompt.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        unlockButton.click();
-      }
-    });
-    unlockButton.addEventListener("click", async () => {
-      password = passwordPrompt.value;
-
-      // Decrypt and redirect if possible
-      let url;
-      try {
-        url = await api.decrypt(encrypted, password, salt, iv);
-      } catch {
-        // Password is incorrect.
-        error("Password is incorrect.");
-
-        // Set the "decrypt without redirect" URL appropriately
-        document.querySelector("#no-redirect").href =
-          `https://lock.adhil.ga/decrypt/#${hash}`;
-
-        // Set the "create hidden bookmark" URL appropriately
-        document.querySelector("#hidden").href =
-          `https://lock.adhil.ga/hidden/#${hash}`;
-        return;
-      }
-
-      try {
-        // Extra check to make sure the URL is valid. Probably shouldn't fail.
-        let urlObj = new URL(url);
-
-        // Prevent XSS by making sure only HTTP URLs are used. Also allow magnet
-        // links for password-protected torrents.
-        if (!(urlObj.protocol == "http:"
-              || urlObj.protocol == "https:"
-              || urlObj.protocol == "magnet:")) {
-          error(`The link uses a non-hypertext protocol, which is not allowed. `
-              + `The URL begins with "${urlObj.protocol}" and may be malicious.`);
-          return;
-        }
-
-        // IMPORTANT NOTE: must use window.location.href instead of the (in my
-        // opinion more proper) window.location.replace. If you use replace, it
-        // causes Chrome to change the icon of a bookmarked link to update it to
-        // the unlocked destination. This is dangerous information leakage.
-        window.location.href = url;
-      } catch {
-        error("A corrupted URL was encrypted. Cannot redirect.");
-        console.log(url);
-        return;
-      }
-    });
-  } else {
-    // Otherwise redirect to the creator
-    window.location.replace("./create");
+// ENCRYPT LINK
+async function handleEncrypt(e) {
+  e.preventDefault();
+  hideMsg('enc-result'); hideMsg('enc-error');
+  // Validate
+  const url = document.getElementById('enc-url').value.trim();
+  const password = document.getElementById('enc-password').value;
+  const confirm = document.getElementById('enc-confirm').value;
+  const hint = document.getElementById('enc-hint').value.trim();
+  if (!url || !password || !confirm) {
+    showMsg('enc-error', 'All fields except hint are required.', 'error');
+    return;
   }
+  if (password !== confirm) {
+    showMsg('enc-error', 'Passwords do not match.', 'error');
+    return;
+  }
+  let urlObj;
+  try {
+    urlObj = new URL(url);
+  } catch {
+    showMsg('enc-error', 'Invalid URL. Include http:// or https://', 'error');
+    return;
+  }
+  if (!(urlObj.protocol === 'http:' || urlObj.protocol === 'https:' || urlObj.protocol === 'magnet:')) {
+    showMsg('enc-error', `Protocol ${urlObj.protocol} not allowed.`, 'error');
+    return;
+  }
+  // Encrypt
+  try {
+    const api = apiVersions[LATEST_API_VERSION];
+    const salt = await api.randomSalt();
+    const iv = await api.randomIv();
+    const encrypted = await api.encrypt(url, password, salt, iv);
+    const output = {
+      v: LATEST_API_VERSION,
+      e: b64.binaryToBase64(new Uint8Array(encrypted))
+    };
+    if (hint) output['h'] = hint;
+    output['s'] = b64.binaryToBase64(salt);
+    output['i'] = b64.binaryToBase64(iv);
+    const fragment = b64.encode(JSON.stringify(output));
+    const link = `${window.location.origin}/#${fragment}`;
+    showMsg('enc-result', `<b>Encrypted Link:</b><br><input type='text' value='${link}' readonly style='width:100%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'>`, 'success');
+  } catch (err) {
+    showMsg('enc-error', 'Encryption failed.', 'error');
+  }
+}
+
+// DECRYPT LINK
+async function handleDecrypt(e) {
+  e.preventDefault();
+  hideMsg('dec-result'); hideMsg('dec-error');
+  const url = document.getElementById('dec-url').value.trim();
+  const password = document.getElementById('dec-password').value;
+  if (!url || !password) {
+    showMsg('dec-error', 'Both fields are required.', 'error');
+    return;
+  }
+  let params;
+  try {
+    const u = new URL(url);
+    params = JSON.parse(b64.decode(u.hash.slice(1)));
+  } catch {
+    showMsg('dec-error', 'Invalid or corrupted encrypted link.', 'error');
+    return;
+  }
+  if (!(params['v'] in apiVersions)) {
+    showMsg('dec-error', 'Unsupported API version.', 'error');
+    return;
+  }
+  const api = apiVersions[params['v']];
+  const encrypted = b64.base64ToBinary(params['e']);
+  const salt = 's' in params ? b64.base64ToBinary(params['s']) : null;
+  const iv = 'i' in params ? b64.base64ToBinary(params['i']) : null;
+  try {
+    const decrypted = await api.decrypt(encrypted, password, salt, iv);
+    showMsg('dec-result', `<b>Decrypted Link:</b><br><input type='text' value='${decrypted}' readonly style='width:100%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'> <a href='${decrypted}' target='_blank' class='button' style='margin-left:8px;'>Open</a>`, 'success');
+  } catch {
+    showMsg('dec-error', 'Incorrect password or corrupted link.', 'error');
+  }
+}
+
+// HIDDEN BOOKMARKS
+let hiddenModalJustEncrypted = false;
+
+async function handleHidden(e) {
+  e.preventDefault();
+  hideMsg('hidden-result'); hideMsg('hidden-error');
+  const hiddenUrl = document.getElementById('hidden-url').value.trim();
+  const title = document.getElementById('hidden-title').value.trim();
+  const disguise = document.getElementById('hidden-disguise').value.trim();
+  if (!hiddenUrl || !title || !disguise) {
+    showMsg('hidden-error', 'All fields are required.', 'error');
+    return;
+  }
+  let hidden, disguiseUrl;
+  try {
+    hidden = new URL(hiddenUrl);
+    disguiseUrl = new URL(disguise);
+  } catch {
+    showMsg('hidden-error', 'Invalid URL(s).', 'error');
+    return;
+  }
+  // Validate hidden link is a valid encrypted link
+  let hash = hidden.hash.slice(1);
+  try {
+    JSON.parse(b64.decode(hash));
+  } catch {
+    showMsg('hidden-error', 'Hidden URL is not a valid encrypted link.', 'error');
+    return;
+  }
+  // Instead of using disguiseUrl.hash = hidden.hash, always use your site as the base
+  const lockerUrl = `${window.location.origin}/${hidden.hash}`;
+  // Output disguised bookmark with no favicon (using a blank data URI as favicon, if possible)
+  const blankFavicon = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+  showMsg('hidden-result', `<b>Disguised Bookmark:</b><br><a class='bookmark' href='${lockerUrl}' draggable='true' rel='noopener noreferrer' style='display:inline-block;padding:10px 18px;background:var(--accent);color:var(--bg);border-radius:8px;font-weight:600;text-decoration:none;'>${title}</a><br><span style='font-size:0.95em;color:var(--text-muted);'>Drag to your bookmarks bar. You can rename it to "${title}". <br>To remove the icon, right-click the bookmark and edit it, then remove or change the icon if your browser allows.</span>`, 'success');
+}
+
+// HIDDEN: Use random Wikipedia link as disguise
+async function handleHiddenRandom(e) {
+  e.preventDefault();
+  const resp = await fetch('https://en.wikipedia.org/w/api.php?format=json&action=query&generator=random&grnnamespace=0&prop=info&inprop=url&origin=*');
+  const data = await resp.json();
+  const page = data.query.pages[Object.keys(data.query.pages)[0]];
+  document.getElementById('hidden-disguise').value = page.canonicalurl;
+  document.getElementById('hidden-title').value = page.title;
+}
+
+// BRUTE FORCE
+function handleBrute(e) {
+  e.preventDefault();
+  hideMsg('brute-result'); hideMsg('brute-error');
+  const url = document.getElementById('brute-url').value.trim();
+  const charset = document.getElementById('brute-charset').value;
+  if (!url || !charset) {
+    showMsg('brute-error', 'Both fields are required.', 'error');
+    return;
+  }
+  let params;
+  try {
+    const u = new URL(url);
+    params = JSON.parse(b64.decode(u.hash.slice(1)));
+  } catch {
+    showMsg('brute-error', 'Invalid or corrupted encrypted link.', 'error');
+    return;
+  }
+  if (!(params['v'] in apiVersions)) {
+    showMsg('brute-error', 'Unsupported API version.', 'error');
+    return;
+  }
+  const api = apiVersions[params['v']];
+  const encrypted = b64.base64ToBinary(params['e']);
+  const salt = 's' in params ? b64.base64ToBinary(params['s']) : null;
+  const iv = 'i' in params ? b64.base64ToBinary(params['i']) : null;
+  let found = false;
+  let tried = 0;
+  let total = 0;
+  let len = 0;
+  let overallTotal = 0;
+  let done = false;
+  let startTime = performance.now();
+  const cset = charset.split("");
+  function progressUpdate() {
+    if (done) return;
+    let delta = performance.now() - startTime;
+    showMsg('brute-result', `Trying ${total} passwords of length ${len} – ${Math.round(100000 * tried / total)/1000}% complete. <br>Testing ${Math.round(1000000 * (overallTotal + tried) / delta)/1000} passwords/sec.`, 'success');
+  }
+  async function tryAllLen(prefix, len_, curLen) {
+    if (done) return;
+    if (len_ == curLen) {
+      tried++;
+      try {
+        await api.decrypt(encrypted, prefix, salt, iv);
+        showMsg('brute-result', `<b>Password found:</b> <input type='text' value='${prefix}' readonly style='width:60%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'>`, 'success');
+        done = true;
+      } catch {}
+      return;
+    }
+    for (let i=0; i < cset.length; i++) {
+      let c = cset[i];
+      await tryAllLen(prefix + c, len_, curLen + 1);
+    }
+  }
+  (async () => {
+    for (len=0; !done && len<6; len++) { // Limit brute force to 6 chars for demo
+      overallTotal += tried;
+      tried = 0;
+      total = Math.pow(cset.length, len);
+      progressUpdate();
+      await tryAllLen("", len, 0);
+    }
+    if (!done) showMsg('brute-result', 'Password not found (limit reached or too slow).', 'error');
+  })();
+  setInterval(progressUpdate, 4000);
+}
+
+// Attach event listeners
+window.addEventListener('DOMContentLoaded', () => {
+  // Encrypt
+  const encForm = document.getElementById('encrypt-form');
+  if (encForm) encForm.onsubmit = handleEncrypt;
+  // Decrypt
+  const decForm = document.getElementById('decrypt-form');
+  if (decForm) decForm.onsubmit = handleDecrypt;
+  // Hidden
+  const hiddenForm = document.getElementById('hidden-form');
+  if (hiddenForm) {
+    hiddenForm.onsubmit = async function(e) {
+      e.preventDefault();
+      const hiddenUrlInput = document.getElementById('hidden-url');
+      let url = hiddenUrlInput.value.trim();
+      let isEncrypted = false;
+      try {
+        let u = new URL(url);
+        let hash = u.hash.slice(1);
+        JSON.parse(b64.decode(hash));
+        isEncrypted = true;
+      } catch { isEncrypted = false; }
+      if (!isEncrypted) {
+        showHiddenEncryptModal(url);
+        return false;
+      }
+      await handleHidden(e);
+    };
+  }
+  const hidRand = document.getElementById('hidden-random');
+  if (hidRand) hidRand.onclick = handleHiddenRandom;
+  // Brute Force
+  const bruteForm = document.getElementById('brute-form');
+  if (bruteForm) bruteForm.onsubmit = handleBrute;
+});
+
+// In the modal encryption logic, set the flag before programmatic submit
+function showHiddenEncryptModal(url) {
+  const modal = document.getElementById('hidden-encrypt-modal');
+  const form = document.getElementById('hidden-encrypt-form');
+  const pass = document.getElementById('hidden-modal-password');
+  const conf = document.getElementById('hidden-modal-confirm');
+  const hint = document.getElementById('hidden-modal-hint');
+  const errorDiv = document.getElementById('hidden-modal-error');
+  errorDiv.style.display = 'none';
+  pass.value = '';
+  conf.value = '';
+  hint.value = '';
+  modal.style.display = 'flex';
+  pass.focus();
+  form.onsubmit = async function(ev) {
+    ev.preventDefault();
+    errorDiv.style.display = 'none';
+    if (pass.value !== conf.value) {
+      errorDiv.innerText = 'Passwords do not match.';
+      errorDiv.style.display = '';
+      return;
+    }
+    if (!pass.value) {
+      errorDiv.innerText = 'Password required.';
+      errorDiv.style.display = '';
+      return;
+    }
+    try {
+      const api = apiVersions[LATEST_API_VERSION];
+      const salt = await api.randomSalt();
+      const iv = await api.randomIv();
+      const encrypted = await api.encrypt(url, pass.value, salt, iv);
+      const output = {
+        v: LATEST_API_VERSION,
+        e: b64.binaryToBase64(new Uint8Array(encrypted))
+      };
+      if (hint.value) output['h'] = hint.value;
+      output['s'] = b64.binaryToBase64(salt);
+      output['i'] = b64.binaryToBase64(iv);
+      const fragment = b64.encode(JSON.stringify(output));
+      const link = `${window.location.origin}/#${fragment}`;
+      document.getElementById('hidden-url').value = link;
+      modal.style.display = 'none';
+      // Directly call handleHidden to create the bookmark without reloading
+      setTimeout(() => handleHidden(new Event('submit')), 0);
+    } catch {
+      errorDiv.innerText = 'Encryption failed.';
+      errorDiv.style.display = '';
+    }
+  };
 }
