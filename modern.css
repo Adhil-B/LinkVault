@@ -156,7 +156,7 @@ label {
 input, textarea, select {
   background: #23262f;
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1.5px solid #3a3f4b;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 1rem;
@@ -165,7 +165,8 @@ input, textarea, select {
   transition: border 0.2s;
 }
 input:focus, textarea:focus, select:focus {
-  border: 1.5px solid var(--accent);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,198,173,0.18);
 }
 
 button, .button {

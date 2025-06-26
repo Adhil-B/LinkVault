@@ -1,6 +1,6 @@
 # 🔒 LinkVault V2
 
-A modern, privacy-first web app to **encrypt, protect, and disguise your links and bookmarks**. All encryption is done client-side—your secrets never leave your browser.
+A privacy-first web app to **encrypt, protect, and disguise your links and bookmarks**. All encryption is done client-side—your secrets never leave your browser.
 
 ---
 
