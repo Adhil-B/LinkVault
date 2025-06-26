@@ -57,7 +57,7 @@ async function handleEncrypt(e) {
     output['i'] = b64.binaryToBase64(iv);
     const fragment = b64.encode(JSON.stringify(output));
     const link = `${window.location.origin}/#${fragment}`;
-    showMsg('enc-result', `<b>Encrypted Link:</b><br><input type='text' value='${link}' readonly style='width:100%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'>`, 'success');
+    showMsg('enc-result', `<b>Encrypted Link:</b><br><div style='display:flex;align-items:center;gap:8px;'><input type='text' value='${link}' readonly style='width:100%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'><button type='button' id='enc-copy-btn'>Copy</button></div>`, 'success');
   } catch (err) {
     showMsg('enc-error', 'Encryption failed.', 'error');
   }
@@ -91,7 +91,7 @@ async function handleDecrypt(e) {
   const iv = 'i' in params ? b64.base64ToBinary(params['i']) : null;
   try {
     const decrypted = await api.decrypt(encrypted, password, salt, iv);
-    showMsg('dec-result', `<b>Decrypted Link:</b><br><input type='text' value='${decrypted}' readonly style='width:100%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'> <a href='${decrypted}' target='_blank' class='button' style='margin-left:8px;'>Open</a>`, 'success');
+    showMsg('dec-result', `<b>Decrypted Link:</b><br><div style='display:flex;align-items:center;gap:8px;'><input type='text' value='${decrypted}' readonly style='width:100%;background:#23262f;color:#fff;border:none;padding:8px 6px;border-radius:6px;' onclick='this.select()'><a href='${decrypted}' target='_blank' class='button' style='margin-left:8px;'>Open</a></div>`, 'success');
   } catch {
     showMsg('dec-error', 'Incorrect password or corrupted link.', 'error');
   }
@@ -298,3 +298,26 @@ function showHiddenEncryptModal(url) {
     }
   };
 }
+
+// Update copy logic to work with new structure
+function setupEncryptCopy() {
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'enc-copy-btn') {
+      const encResult = document.getElementById('enc-result');
+      const input = encResult.querySelector('input[type="text"]');
+      const copyMsg = document.getElementById('enc-copy-msg');
+      if (input) {
+        input.select();
+        navigator.clipboard.writeText(input.value).then(() => {
+          copyMsg.innerText = 'Copied!';
+          copyMsg.style.display = '';
+          setTimeout(() => { copyMsg.style.display = 'none'; }, 1800);
+        }, () => {
+          copyMsg.innerText = 'Copy failed.';
+          copyMsg.style.display = '';
+        });
+      }
+    }
+  });
+}
+window.addEventListener('DOMContentLoaded', setupEncryptCopy);

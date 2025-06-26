@@ -1,5 +1,5 @@
 /*
- * Modern Dark Theme for Locker
+ * Modern Dark Theme for LinkVault
  * Compact, card-based, modern UI
  */
 
@@ -220,17 +220,194 @@ footer {
 @media (max-width: 800px) {
   nav {
     max-width: 100vw;
+    width: 100vw;
+    margin: 16px 0 24px 0;
     padding: 0 2vw;
   }
-}
-
-@media (max-width: 600px) {
-  .main-cards, header {
+  .main-cards {
     max-width: 100vw;
+    width: 100vw;
     padding: 0 2vw;
   }
   .card {
-    padding: 16px 6px 14px 6px;
+    max-width: 100vw;
+    width: 100vw;
+    padding: 20px 6vw 18px 6vw;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 500px) {
+  nav {
+    padding: 0 1vw;
+    font-size: 0.98rem;
+  }
+  .main-cards {
+    padding: 0 1vw;
+  }
+  .card {
+    padding: 14px 2vw 12px 2vw;
+    font-size: 0.98rem;
+  }
+  .bookmark, button, .button {
+    font-size: 0.98rem;
+    padding: 10px 8px;
+    min-width: 0;
+  }
+  input, textarea, select {
+    font-size: 1rem;
+    padding: 10px 8px;
+  }
+  .output input[type="text"], .output input[type="url"] {
+    font-size: 1rem;
+    padding: 10px 8px;
+  }
+}
+/* Make flex rows stack vertically on mobile */
+@media (max-width: 600px) {
+  nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    width: calc(100% - 6vw);
+    max-width: 700px;
+    margin: 0 3vw;
+    box-sizing: border-box;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .main-cards {
+    max-width: 700px;
+    width: calc(100% - 6vw);
+    padding: 0;
+    margin: 0 3vw;
+    gap: 16px;
+    box-sizing: border-box;
+  }
+  .card {
+    max-width: 700px;
+    width: 100%;
+    padding: 28px 5vw;
+    font-size: 1.02rem;
+    box-sizing: border-box;
+    gap: 16px;
+    border-radius: var(--radius);
+    margin: 0 auto;
+  }
+  nav button {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    font-size: 1.12rem;
+    padding: 16px 0;
+    border-radius: 0;
+    background: rgba(0,198,173,0.07);
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+    transition: background 0.18s, color 0.18s;
+  }
+  nav button:last-child {
+    border-bottom: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  nav button:first-child {
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  nav button.active, nav button:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 2px 8px 0 rgba(0,198,173,0.10);
+  }
+  .logo {
+    font-size: 1.6rem !important;
+    margin-top: 8px !important;
+    margin-bottom: 28px !important;
+  }
+  .bookmark, button, .button {
+    font-size: 1.08rem;
+    padding: 16px 14px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  input, textarea, select {
+    font-size: 1.08rem;
+    padding: 16px 14px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .output input[type="text"], .output input[type="url"] {
+    font-size: 1.08rem;
+    padding: 16px 14px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .output div, .output label {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .form, form {
+    gap: 12px;
+  }
+  .labeled-input, .form-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px;
+    width: 100%;
+  }
+  .labeled-input label, .form-row label {
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    margin-right: 0;
+  }
+  .labeled-input input, .form-row input,
+  .labeled-input textarea, .form-row textarea {
+    width: 100%;
+    min-width: 0;
+  }
+  .output input[type="text"], .output input[type="url"] {
+    width: 100%;
+    min-width: 0;
+  }
+  .output {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .success, .error, .alert {
+    font-size: 1.05rem;
+    padding: 16px 14px;
+    word-break: break-word;
+  }
+}
+@media (max-width: 400px) {
+  .logo {
+    font-size: 1.35rem !important;
+    margin-top: 6px !important;
+    margin-bottom: 22px !important;
+  }
+  nav button {
+    font-size: 1rem;
+    padding: 12px 0;
+  }
+  .card {
+    padding: 18px 3vw;
+  }
+  nav {
+    padding: 0;
+    width: calc(100% - 6vw);
+    margin: 0 3vw;
+  }
+  .main-cards {
+    padding: 0;
+    width: calc(100% - 6vw);
+    margin: 0 3vw;
   }
 }
 
